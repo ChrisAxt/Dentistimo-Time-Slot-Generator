@@ -2,11 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var timeSlotSchema = new Schema({
-    openAppointmentsNo: {type: String},
-    start: {type: time},
+    start: {type: String},
     end: {type: String},
     available: {type: Number}, 
-    date: {type: date}
+    date: {type: String}
 });
 
 module.exports = mongoose.model('timeSlot', timeSlotSchema);
