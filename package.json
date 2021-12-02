@@ -2,7 +2,7 @@
   "name": "Time_Slot_Generator",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "time_slot_controller.js",
   "scripts": {
     "unit-test": "jest",
     "start": "node time_slot_controller.js"
