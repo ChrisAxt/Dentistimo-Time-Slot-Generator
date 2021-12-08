@@ -54,8 +54,11 @@ client.on('message', (subscribeTopic, payload) => {
     if (payload.toString() === "") {
         console.log('Payload can not be empty!')
     } else {
-        readMessage(payload.toString())
+        if(readMessage(payload.toString())){
         generateTimeSlots()
+        }else{
+            console.log('Invalid JSON file')
+        }
     }
 })
 
@@ -64,7 +67,7 @@ client.on('message', (subscribeTopic, payload) => {
 //**********************************************************************************************************************************/
 
 function readMessage (message) {
-
+    var isValid = true;
     var dateArray = new Array;
     var clinicArray = new Array;
 
@@ -80,13 +83,19 @@ function readMessage (message) {
             clinicArray.push(messageArray[i])
         }
     }
-    date = new Date(Date.parse(dateArray.join("")))
+    try {
+        date = new Date(Date.parse(dateArray.join("")))
+        clinic = JSON.parse(clinicArray.join(""))
+      } catch (error) {
+          isValid = false;
+          console.error(error);
+      }
     var weekday = new Array("sunday", "monday", "tuesday", "wednesday",
         "thursday", "friday", "saturday");
 
     day = weekday[date.getDay()];
-    clinic = JSON.parse(clinicArray.join(""))
-
+        
+      return isValid;
 }
 
 //**********************************************************************************************************************************/
