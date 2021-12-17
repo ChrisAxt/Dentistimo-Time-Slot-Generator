@@ -3,11 +3,11 @@ var TimeSlot = require('./models/timeSlot')
 const mqtt = require('mqtt');
 
 /** Different MQTT servers */
-const LOCALHOST = '' //TODO: fill with the local mqtt address
+const LOCALHOST = `mqtt://localhost:1883` 
 const HOST = 'mqtt://test.mosquitto.org' //mosquitto test server address
 
 /** Subscribed topics for MQTT */
-const subscribeTopic = '/Team5/Dentistimo/GenTimeSlots'
+const subscribeTopic = '/Team5/Dentistimo/GenerateTimeSlots'
 
 /** Published topics for MQTT */
 const publishTopic = '/Team5/Dentistimo/TimeSlots'
@@ -16,7 +16,7 @@ const publishTopic = '/Team5/Dentistimo/TimeSlots'
  * Connects to the servers defined in the constants above
  * @type {MqttClient}
  */
-const client = mqtt.connect(HOST) //Change the parameter between HOST or LOCALHOST if you want to connect to the mosquitto test broker or a local broker. For local, mosquitto needs to be installed and running
+const client = mqtt.connect(LOCALHOST) //Change the parameter between HOST or LOCALHOST if you want to connect to the mosquitto test broker or a local broker. For local, mosquitto needs to be installed and running
 
 // Global variables 
 var date;
@@ -25,8 +25,9 @@ var startHour;
 var startMin;
 var endHour;
 var endMin;
-var clinic;
+var clinicId;
 var dentistNo;
+var data;
 //duration of each time slot in min
 const duration = 30;
 
@@ -39,9 +40,6 @@ client.on('connect', function() {
     client.subscribe(subscribeTopic, function (err) {
         if (!err) {
             console.log("Subscribed to " + subscribeTopic + " successfully")
-            var mqttPayload = '02 Dec 2021 09:32:00 GMT+1-{"id": 1,"name": "Your Dentist","owner": "Dan Tist","dentists": 3,"address": "Spannmålsgatan 20","city": "Gothenburg","coordinate": {"longitude": 11.969388,"latitude": 57.707619},"openinghours": {"monday": "9:00-17:00","tuesday": "8:00-17:00","wednesday": "7:00-16:00","thursday": "9:00-17:00","friday": "9:00-15:00"}}' // = example
-
-            client.publish(subscribeTopic, mqttPayload, {qos:1} ) // For testing, should be removed
         }else{
             console.log(err.message);
         }
@@ -67,25 +65,11 @@ client.on('message', (subscribeTopic, payload) => {
 //**********************************************************************************************************************************/
 
 function readMessage (message) {
-    var isValid = true;
-    var dateArray = new Array;
-    var clinicArray = new Array;
-
-    const n = message.search("-");
-    let messageArray = message.split('')
-
-    const messageLength = messageArray.length
-
-    for (let i = 0; i < messageLength; i++) {
-        if (i < n) {
-            dateArray.push(messageArray[i])
-        } else if (i > n) {
-            clinicArray.push(messageArray[i])
-        }
-    }
+     var isValid = true;
     try {
-        date = new Date(Date.parse(dateArray.join("")))
-        clinic = JSON.parse(clinicArray.join(""))
+        data = JSON.parse(message)
+        date = new Date(Date.parse(data.date))
+        //clinic = JSON.parse(clinicArray.join(""))
       } catch (error) {
           isValid = false;
           console.error(error);
@@ -94,7 +78,7 @@ function readMessage (message) {
         "thursday", "friday", "saturday");
 
     day = weekday[date.getDay()];
-        
+    clinicId = data.clinic._id    
       return isValid;
 }
 
@@ -105,23 +89,23 @@ function readMessage (message) {
 function generateTimeSlots() {
     // Access opening hours for specific day, for specific clinic from stored Json object
     var dayOpeningHours = new String 
-    dentistNo = clinic.dentists 
+    dentistNo = data.clinic.dentists 
 
     switch(day.toLowerCase()) {
         case 'monday':
-          dayOpeningHours = clinic.openinghours.monday
+          dayOpeningHours = data.clinic.openinghours.monday
           break;
         case 'tuesday':
-            dayOpeningHours = clinic.openinghours.tuesday
+            dayOpeningHours = data.clinic.openinghours.tuesday
           break;
           case 'wednesday':
-            dayOpeningHours = clinic.openinghours.wednesday
+            dayOpeningHours = data.clinic.openinghours.wednesday
           break;
           case 'thursday':
-            dayOpeningHours = clinic.openinghours.thursday
+            dayOpeningHours = data.clinic.openinghours.thursday
           break;
           case 'friday':
-            dayOpeningHours = clinic.openinghours.friday
+            dayOpeningHours = data.clinic.openinghours.friday
           break;
         default:   
     }
@@ -142,8 +126,14 @@ function generateTimeSlots() {
         timeSlot.date = date.toDateString()
         timeSlots.push(timeSlot)
     };
-    console.log('Time Slots : ' + timeSlots)
-    //client.publish(subscribeTopic, timeSlots.toString(), {qos:1} )
+    console.log(JSON.stringify(timeSlots))
+    if(timeSlots != null){
+        var mqttPayload = {
+            clinicId: clinicId,
+            timeSlots: timeSlots}
+        client.publish(publishTopic, JSON.stringify(mqttPayload));
+        console.log('published')
+    }
 }  
 
 //**********************************************************************************************************************************/
@@ -190,8 +180,12 @@ function splitTime (dayOpeningHours){
             endMinArray.push(endTimeArray[i])
         }
     }
-    endHour = parseInt(endHourArray.join(""))
-    endMin = parseInt(endMinArray.join(""))
+    try {
+        endHour = parseInt(endHourArray.join(""))
+        endMin = parseInt(endMinArray.join(""))
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 //**********************************************************************************************************************************/
