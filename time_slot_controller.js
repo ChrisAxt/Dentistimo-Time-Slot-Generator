@@ -12,6 +12,9 @@ const subscribeTopic = '/Team5/Dentistimo/GenerateTimeSlots'
 /** Published topics for MQTT */
 const publishTopic = '/Team5/Dentistimo/TimeSlots'
 
+/** Error topics for MQTT */
+const errorTopic = '/Team5/Dentistimo/TimeSlot/Error'
+
 /**
  * Connects to the servers defined in the constants above
  * @type {MqttClient}
@@ -36,10 +39,10 @@ const duration = 30;
 //**********************************************************************************************************************************/
 
 client.on('connect', function() {
-    console.log("Connected to Mqtt broker successfully" )
+    console.log("Connected to Mqtt broker successfully");
     client.subscribe(subscribeTopic, function (err) {
         if (!err) {
-            console.log("Subscribed to " + subscribeTopic + " successfully")
+            console.log("Subscribed to " + subscribeTopic + " successfully");
         }else{
             console.log(err.message);
         }
@@ -47,15 +50,15 @@ client.on('connect', function() {
 })
 
 client.on('message', (subscribeTopic, payload) => {
-    console.log('Received Message:', subscribeTopic, payload.toString())
+    console.log('Received Message:', subscribeTopic, payload.toString());
  
     if (payload.toString() === "") {
-        console.log('Payload can not be empty!')
+        console.log('Payload can not be empty!');
     } else {
         if(readMessage(payload.toString())){
-        generateTimeSlots()
+        generateTimeSlots();
         }else{
-            console.log('Invalid JSON file')
+            console.log('Invalid JSON file');
         }
     }
 })
@@ -67,18 +70,18 @@ client.on('message', (subscribeTopic, payload) => {
 function readMessage (message) {
      var isValid = true;
     try {
-        data = JSON.parse(message)
-        date = new Date(Date.parse(data.date))
-        //clinic = JSON.parse(clinicArray.join(""))
+        data = JSON.parse(message);
+        date = new Date(Date.parse(data.date));
       } catch (error) {
-          isValid = false;
           console.error(error);
+          client.publish(errorTopic, 'Parsing error: ' + error.toString());
+          return false;
       }
     var weekday = new Array("sunday", "monday", "tuesday", "wednesday",
         "thursday", "friday", "saturday");
 
     day = weekday[date.getDay()];
-    clinicId = data.clinic._id    
+    clinicId = data.clinic._id;    
       return isValid;
 }
 
@@ -88,24 +91,24 @@ function readMessage (message) {
 
 function generateTimeSlots() {
     // Access opening hours for specific day, for specific clinic from stored Json object
-    var dayOpeningHours = new String 
-    dentistNo = data.clinic.dentists 
+    var dayOpeningHours = new String;
+    dentistNo = data.clinic.dentists; 
 
     switch(day.toLowerCase()) {
         case 'monday':
-          dayOpeningHours = data.clinic.openinghours.monday
+          dayOpeningHours = data.clinic.openinghours.monday;
           break;
         case 'tuesday':
-            dayOpeningHours = data.clinic.openinghours.tuesday
+            dayOpeningHours = data.clinic.openinghours.tuesday;
           break;
           case 'wednesday':
-            dayOpeningHours = data.clinic.openinghours.wednesday
+            dayOpeningHours = data.clinic.openinghours.wednesday;
           break;
           case 'thursday':
-            dayOpeningHours = data.clinic.openinghours.thursday
+            dayOpeningHours = data.clinic.openinghours.thursday;
           break;
           case 'friday':
-            dayOpeningHours = data.clinic.openinghours.friday
+            dayOpeningHours = data.clinic.openinghours.friday;
           break;
         default:   
     }
@@ -114,25 +117,24 @@ function generateTimeSlots() {
     splitTime(dayOpeningHours);
     
     //calculate how many time slots are in this day according to the set duration
-    var OHinMin = ((endHour * 60) + endMin) - ((startHour * 60) + startMin)
-    var slotNo = (OHinMin / duration) - 1
-    var timeSlots = new Array
+    var OHinMin = ((endHour * 60) + endMin) - ((startHour * 60) + startMin);
+    var slotNo = (OHinMin / duration) - 1;
+    var timeSlots = new Array;
     // generate timeslots based on above
     for(let i = 0; i <= slotNo; i++){
         var timeSlot = new TimeSlot();
-        timeSlot.start = convertStartTime(i, startHour, startMin)
-        timeSlot.end = convertEndTime(i, startHour, startMin)
-        timeSlot.available = dentistNo
-        timeSlot.date = date.toDateString()
-        timeSlots.push(timeSlot)
+        timeSlot.start = convertStartTime(i, startHour, startMin);
+        timeSlot.end = convertEndTime(i, startHour, startMin);
+        timeSlot.available = dentistNo;
+        timeSlot.date = date.toDateString();
+        timeSlots.push(timeSlot);
     };
-    console.log(JSON.stringify(timeSlots))
     if(timeSlots != null){
         var mqttPayload = {
             clinicId: clinicId,
-            timeSlots: timeSlots}
+            timeSlots: timeSlots};
         client.publish(publishTopic, JSON.stringify(mqttPayload));
-        console.log('published')
+        console.log('published ' + timeSlots.length +  ' timeSlots');
     }
 }  
 
@@ -142,49 +144,48 @@ function generateTimeSlots() {
 
 function splitTime (dayOpeningHours){
     let n = dayOpeningHours.toString().search("-");
-    let dayOpeningHoursArray = dayOpeningHours.split('')
-    var startTimeArray = new Array
-    var endTimeArray = new Array
-    var startHourArray = new Array
-    var startMinArray = new Array
-    var endHourArray = new Array
-    var endMinArray = new Array
+    let dayOpeningHoursArray = dayOpeningHours.split('');
+    var startTimeArray = new Array;
+    var endTimeArray = new Array;
+    var startHourArray = new Array;
+    var startMinArray = new Array;
+    var endHourArray = new Array;
+    var endMinArray = new Array;
 
     for(let i = 0; i < dayOpeningHoursArray.length; i++){
         if(i < n){
-            startTimeArray.push(dayOpeningHoursArray[i])
+            startTimeArray.push(dayOpeningHoursArray[i]);
         }else if(i > n){
-            endTimeArray.push(dayOpeningHoursArray[i])
+            endTimeArray.push(dayOpeningHoursArray[i]);
         }
     }
-    const startSplit = startTimeArray.join("").search(":")
-    console.log(startSplit)
-    const endSplit = endTimeArray.join("").search(":")
+    const startSplit = startTimeArray.join("").search(":");
+    const endSplit = endTimeArray.join("").search(":");
 
     //Split opening time into hour/min
     for(let i = 0; i < startTimeArray.length; i++){
         if(i < startSplit){
-            startHourArray.push(startTimeArray[i])
+            startHourArray.push(startTimeArray[i]);
         }else if(i > startSplit){
-            startMinArray.push(startTimeArray[i])
+            startMinArray.push(startTimeArray[i]);
         }
     }
-    startHour = parseInt(startHourArray.join(""))
-    startMin = parseInt(startMinArray.join(""))
+    startHour = parseInt(startHourArray.join(""));
+    startMin = parseInt(startMinArray.join(""));
 
     //Split closing time into hour/min
     for(let i = 0; i < endTimeArray.length; i++){
         if(i < endSplit){
-            endHourArray.push(endTimeArray[i]) 
+            endHourArray.push(endTimeArray[i]);
         }else if(i > endSplit){
-            endMinArray.push(endTimeArray[i])
+            endMinArray.push(endTimeArray[i]);
         }
     }
     try {
-        endHour = parseInt(endHourArray.join(""))
-        endMin = parseInt(endMinArray.join(""))
+        endHour = parseInt(endHourArray.join(""));
+        endMin = parseInt(endMinArray.join(""));
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
 }
 
@@ -194,22 +195,22 @@ function splitTime (dayOpeningHours){
 
 function convertStartTime(i, startHour, startMin){
 
-    startMin = startMin + (duration * i)
-    var startTime
+    startMin = startMin + (duration * i);
+    var startTime;
 
     if(startMin > 59){
-        startMin = startMin / 60
-        startHour += Math.floor(startMin) 
-        var n = Math.trunc(startMin)
-        startMin = (startMin) - n
-        startMin = (((startMin / 100) * 60) * 100)
+        startMin = startMin / 60;
+        startHour += Math.floor(startMin); 
+        var n = Math.trunc(startMin);
+        startMin = (startMin) - n;
+        startMin = (((startMin / 100) * 60) * 100);
     }
-    var trailingZero = ''
+    var trailingZero = '';
         if(startMin == 0){
-            trailingZero = '0'
+            trailingZero = '0';
         }
-        Math.ceil(startMin)
-    return startTime = startHour.toString() +':'+ startMin.toString() + trailingZero  
+        Math.ceil(startMin);
+    return startTime = startHour.toString() +':'+ startMin.toString() + trailingZero;  
 }
 
 //**********************************************************************************************************************************/
@@ -219,19 +220,19 @@ function convertStartTime(i, startHour, startMin){
 function convertEndTime(i, endHour, endMin){
 
     endMin = endMin + (duration * (i + 1))
-    var endTime
+    var endTime;
 
     if(endMin > 59){
-        endMin = endMin / 60
-        endHour += Math.floor(endMin) 
-        var n = Math.trunc(endMin)
-        endMin = (endMin) - n
-        endMin = (((endMin / 100) * 60) * 100)
+        endMin = endMin / 60;
+        endHour += Math.floor(endMin);
+        var n = Math.trunc(endMin);
+        endMin = (endMin) - n;
+        endMin = (((endMin / 100) * 60) * 100);
     }
-    var trailingZero = ''
+    var trailingZero = '';
     if(endMin == 0){
-        trailingZero = '0'
+        trailingZero = '0';
     }
-    Math.ceil(endMin)
-    return endTime = endHour.toString() +':'+ endMin.toString() + trailingZero
+    Math.ceil(endMin);
+    return endTime = endHour.toString() +':'+ endMin.toString() + trailingZero;
 }
