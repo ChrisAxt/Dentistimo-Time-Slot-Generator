@@ -2,10 +2,10 @@
   "name": "Time_Slot_Generator",
   "version": "1.0.0",
   "description": "",
-  "main": "time_slot_controller.js",
+  "main": "Index.js",
   "scripts": {
     "unit-test": "jest",
-    "start": "node time_slot_controller.js"
+    "start": "node Index.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "dotenv": "^10.0.0",
+    "inquirer": "^8.2.0",
     "express": "^4.17.1",
     "mongoose": "^6.0.13",
     "mqtt": "^4.2.8"
