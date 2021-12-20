@@ -74,6 +74,9 @@ client.on('message', (subscribeTopic, payload) => {
     }
 })
 
+/**
+ * unsubscribes and end the connection to the broker
+ */
 module.exports.disconnect = function(){
     client.unsubscribe(subscribeTopic, console.log('Unsubscribing to ' + subscribeTopic))
     client.end()

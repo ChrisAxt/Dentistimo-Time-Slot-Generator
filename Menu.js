@@ -4,7 +4,7 @@ const timeSlotController = require('./time_slot_controller.js')
 
 
 /**
- * Waits for user input to close the booking handler. Closing the booking handler disconnects the component in a clean way from the system
+ * Waits for user input to close the time slot generator. Closing the time slot generator disconnects the component in a clean way from the system
  */
 module.exports.printMenu = function() {
     inquirer.prompt( [
