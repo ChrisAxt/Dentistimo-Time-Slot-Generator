@@ -1,3 +1,3 @@
-const menu = require('./menu');
+const menu = require('./Menu');
 
 menu.printMenu();
