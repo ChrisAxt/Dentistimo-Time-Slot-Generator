@@ -84,6 +84,6 @@ In the window of your terminal, you should see a message similar to this:
 `Connected to Mqtt broker successfully`<br>
 `Subscribed to /Team5/Dentistimo/GenerateTimeSlots successfully`
 
-The booking handler is now ready to proceed your requests. 
+The tome slot generator is now ready to process your requests. 
 
 
