@@ -15,11 +15,22 @@ const publishTopic = '/Team5/Dentistimo/TimeSlots'
 /** Error topics for MQTT */
 const errorTopic = '/Team5/Dentistimo/TimeSlot/Error'
 
+/** Defines the options used to connect to MQTT broker*/
+const options = {
+    clientId:'Dentistimo Team5 - Time Slot Generator n°' + Math.random().toString(16).substr(2, 8),
+    will: {
+        topic: "Team5/Dentistimo/TimeSlotGenerator/LastWill",
+        payload: "Time SlotGenerator has been disconnected from the system",
+        qos: 1
+    }
+}
+
 /**
  * Connects to the servers defined in the constants above
  * @type {MqttClient}
  */
-const client = mqtt.connect(LOCALHOST) //Change the parameter between HOST or LOCALHOST if you want to connect to the mosquitto test broker or a local broker. For local, mosquitto needs to be installed and running
+
+const client = mqtt.connect(LOCALHOST, options) //Change the parameter between HOST or LOCALHOST if you want to connect to the mosquitto test broker or a local broker. For local, mosquitto needs to be installed and running
 
 // Global variables 
 var date;
@@ -62,6 +73,14 @@ client.on('message', (subscribeTopic, payload) => {
         }
     }
 })
+
+/**
+ * unsubscribes and end the connection to the broker
+ */
+module.exports.disconnect = function(){
+    client.unsubscribe(subscribeTopic, console.log('Unsubscribing to ' + subscribeTopic))
+    client.end()
+}
 
 //**********************************************************************************************************************************/
 // split message into "date" and "clinic"
