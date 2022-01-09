@@ -75,9 +75,10 @@ To download the latest version of node.js, please follow this [link](https://nod
 
 | Step | Command |
 | ------ | ------ |
-| start your MQTT broker on port 1883| This differs based on which broker, as well as your settings. Make sure the broker listens to port 1883. (Default port with mosquitto) |
-| clone this project on your machine | `git clone < SSH address or HTTPS address >` |
-| go to the repo and run the following  | `npm start` |
+| Start your MQTT broker on port 1883| This differs based on which broker, as well as your settings. Make sure the broker listens to port 1883. (Default port with mosquitto) |
+| Clone this project on your machine | `git clone < SSH address or HTTPS address >` |
+| Install necessary dependencies by running the following  | `npm install` |
+| Go to the repo and run the following  | `npm start` |
 
 In the window of your terminal, you should see a message similar to this:
 
