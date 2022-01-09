@@ -7,7 +7,7 @@ The time slot generator takes care of generating 30 minutes time slots according
 
 ## Component Responsibilities
 
-- Listen to MQQT broker for a generate request (Subscribed to: `/Team5/Dentistimo/GenerateTimeSlots`)
+- Listen to MQTT broker for a generate time slots request (Subscribed to: `/Team5/Dentistimo/GenerateTimeSlots`)
 - Generate time slots based on opening hours from selected clinic
 - Publish time slots to the availability checker (Published to: `/Team5/Dentistimo/TimeSlots`)
 
