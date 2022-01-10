@@ -7,7 +7,7 @@ The time slot generator takes care of generating 30 minutes time slots according
 
 ## Component Responsibilities
 
-- Listen to MQQT broker for a generate request (Subscribed to: `/Team5/Dentistimo/GenerateTimeSlots`)
+- Listen to MQTT broker for a generate time slots request (Subscribed to: `/Team5/Dentistimo/GenerateTimeSlots`)
 - Generate time slots based on opening hours from selected clinic
 - Publish time slots to the availability checker (Published to: `/Team5/Dentistimo/TimeSlots`)
 
@@ -75,15 +75,16 @@ To download the latest version of node.js, please follow this [link](https://nod
 
 | Step | Command |
 | ------ | ------ |
-| start your MQTT broker on port 1883| This differs based on which broker, as well as your settings. Make sure the broker listens to port 1883. (Default port with mosquitto) |
-| clone this project on your machine | `git clone < SSH address or HTTPS address >` |
-| go to the repo and run the following  | `npm start` |
+| Start your MQTT broker on port 1883| This differs based on which broker, as well as your settings. Make sure the broker listens to port 1883. (Default port with mosquitto) |
+| Clone this project on your machine | `git clone < SSH address or HTTPS address >` |
+| Install necessary dependencies by running the following  | `npm install` |
+| Go to the repo and run the following  | `npm start` |
 
 In the window of your terminal, you should see a message similar to this:
 
 `Connected to Mqtt broker successfully`<br>
 `Subscribed to /Team5/Dentistimo/GenerateTimeSlots successfully`
 
-The tome slot generator is now ready to process your requests. 
+The time slot generator is now ready to process your requests. 
 
 
