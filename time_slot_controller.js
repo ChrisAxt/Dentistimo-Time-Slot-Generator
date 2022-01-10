@@ -64,7 +64,7 @@ client.on('connect', function () {
  * MQTT on message recieved
  */
 client.on('message', (subscribeTopic, payload) => {
-    console.log('Received Message:', subscribeTopic, payload.toString());
+    console.log('Received Message from:', subscribeTopic);
 
     if (payload.toString() === "") {
         console.log('Payload can not be empty!');
@@ -157,7 +157,6 @@ function generateTimeSlots() {
             timeSlots: timeSlots
         };
         client.publish(publishTopic, JSON.stringify(mqttPayload));
-        console.log(timeSlots)
         console.log('published ' + timeSlots.length + ' timeSlots');
     }
 }
