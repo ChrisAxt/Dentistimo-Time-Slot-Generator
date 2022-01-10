@@ -45,9 +45,9 @@ var data;
 //duration of each time slot in min
 const duration = 30;
 
-//**********************************************************************************************************************************/
-// MQTT
-//**********************************************************************************************************************************/
+/**
+ * MQTT connection and subscribe to topic
+ */
 
 client.on('connect', function () {
     console.log("Connected to Mqtt broker successfully");
@@ -60,6 +60,9 @@ client.on('connect', function () {
     })
 })
 
+/**
+ * MQTT on message recieved
+ */
 client.on('message', (subscribeTopic, payload) => {
     console.log('Received Message:', subscribeTopic, payload.toString());
 
@@ -82,10 +85,11 @@ module.exports.disconnect = function () {
     client.end()
 }
 
-//**********************************************************************************************************************************/
-// split message into "date" and "clinic"
-//**********************************************************************************************************************************/
-
+/**
+ * Parses incomming message
+ * @param message 
+ * @returns a boolean
+ */
 function readMessage(message) {
     var isValid = true;
     try {
@@ -104,10 +108,9 @@ function readMessage(message) {
     return isValid;
 }
 
-//**********************************************************************************************************************************/
-// Generate time slots based on information collected from the database and calculations made in other methods
-//**********************************************************************************************************************************/
-
+/**
+ * Generates time slots based on the message recieved 
+ */
 function generateTimeSlots() {
     // Access opening hours for specific day, for specific clinic from stored Json object
     var dayOpeningHours = new String;
@@ -158,10 +161,10 @@ function generateTimeSlots() {
     }
 }
 
-//**********************************************************************************************************************************/
-// Split the dayOpeningHours into 2 times (opening and closing) then into min and hours for both
-//**********************************************************************************************************************************/
-
+/**
+ * Splits time strings and converts into Hours and min for opening and closing times
+ * @param dayOpeningHours 
+ */
 function splitTime(dayOpeningHours) {
     let n = dayOpeningHours.toString().search("-");
     let dayOpeningHoursArray = dayOpeningHours.split('');
@@ -209,10 +212,13 @@ function splitTime(dayOpeningHours) {
     }
 }
 
-//**********************************************************************************************************************************/
-// Convert start time from hours and miniutes to time format 
-//**********************************************************************************************************************************/
-
+/**
+ * Parses start time into a time format
+ * @param i 
+ * @param startHour 
+ * @param startMin 
+ * @returns 
+ */
 function convertStartTime(i, startHour, startMin) {
 
     startMin = startMin + (duration * i);
@@ -233,10 +239,14 @@ function convertStartTime(i, startHour, startMin) {
     return startTime = startHour.toString() + ':' + startMin.toString() + trailingZero;
 }
 
-//**********************************************************************************************************************************/
-// Convert end time from hours and miniutes to time format in string
-//**********************************************************************************************************************************/
 
+/**
+ * Parses end time into a date format
+ * @param i 
+ * @param endHour 
+ * @param endMin 
+ * @returns 
+ */
 function convertEndTime(i, endHour, endMin) {
 
     endMin = endMin + (duration * (i + 1))
