@@ -145,8 +145,8 @@ function generateTimeSlots() {
     // generate timeslots based on above
     for (let i = 0; i <= slotNo; i++) {
         var timeSlot = new TimeSlot();
-        timeSlot.start = convertStartTime(i, startHour, startMin);
-        timeSlot.end = convertEndTime(i, startHour, startMin);
+        timeSlot.start = convertTime(i, startHour, startMin, true);
+        timeSlot.end = convertTime(i, startHour, startMin, false);
         timeSlot.available = dentistNo;
         timeSlot.date = date.toDateString();
         timeSlots.push(timeSlot);
@@ -157,6 +157,7 @@ function generateTimeSlots() {
             timeSlots: timeSlots
         };
         client.publish(publishTopic, JSON.stringify(mqttPayload));
+        console.log(timeSlots)
         console.log('published ' + timeSlots.length + ' timeSlots');
     }
 }
@@ -213,56 +214,31 @@ function splitTime(dayOpeningHours) {
 }
 
 /**
- * Parses start time into a time format
+ * Parses hour and min into a time format
  * @param i 
  * @param startHour 
  * @param startMin 
  * @returns 
  */
-function convertStartTime(i, startHour, startMin) {
+function convertTime(i, hour, min, start) {
 
-    startMin = startMin + (duration * i);
-    var startTime;
+    if(start){
+        min = min + (duration * i);
+    }else{
+        min = min + (duration * (i + 1))
+    }
 
-    if (startMin > 59) {
-        startMin = startMin / 60;
-        startHour += Math.floor(startMin);
-        var n = Math.trunc(startMin);
-        startMin = (startMin) - n;
-        startMin = (((startMin / 100) * 60) * 100);
+    if (min > 59) {
+        min = min / 60;
+        hour += Math.floor(min);
+        var n = Math.trunc(min);
+        min = (min) - n;
+        min = (((min / 100) * 60) * 100);
     }
     var trailingZero = '';
-    if (startMin == 0) {
+    if (min == 0) {
         trailingZero = '0';
     }
-    Math.ceil(startMin);
-    return startTime = startHour.toString() + ':' + startMin.toString() + trailingZero;
-}
-
-
-/**
- * Parses end time into a date format
- * @param i 
- * @param endHour 
- * @param endMin 
- * @returns 
- */
-function convertEndTime(i, endHour, endMin) {
-
-    endMin = endMin + (duration * (i + 1))
-    var endTime;
-
-    if (endMin > 59) {
-        endMin = endMin / 60;
-        endHour += Math.floor(endMin);
-        var n = Math.trunc(endMin);
-        endMin = (endMin) - n;
-        endMin = (((endMin / 100) * 60) * 100);
-    }
-    var trailingZero = '';
-    if (endMin == 0) {
-        trailingZero = '0';
-    }
-    Math.ceil(endMin);
-    return endTime = endHour.toString() + ':' + endMin.toString() + trailingZero;
+    Math.ceil(min);
+    return hour.toString() + ':' + min.toString() + trailingZero;
 }
