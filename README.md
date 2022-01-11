@@ -90,7 +90,7 @@ The time slot generator is now ready to process your requests.
 ## Closing/unsubscribing
  When starting the component using `npm start`, the following message will appear in the terminal:
 
- ![Screenshot_2022-01-10_at_17.56.33](/uploads/73bcf85aa958e62a987da47fbb7cf2d0/Screenshot_2022-01-10_at_17.56.33.png)
+ <img src="./Assets/closingComp.png" width="320" height="84">
 
   To unsubscribe, simply follow the commands specified in terminal: 
      `x`and then press `enter`
